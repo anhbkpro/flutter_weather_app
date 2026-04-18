@@ -12,8 +12,6 @@ A simple Flutter weather app that tracks 10 world cities. Swipe between cities, 
   <img src="images/settings.png" alt="Settings — pick cities" width="260" />
 </p>
 
-> Place your screenshots in an `images/` folder at the repo root using the filenames above. If you used different filenames, update the paths in this section.
-
 ## Features
 
 - Browse weather for 10 world cities: Hanoi, Ho Chi Minh City, Tokyo, New York, London, Paris, Sydney, Dubai, Singapore, San Francisco.
