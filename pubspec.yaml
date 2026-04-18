@@ -1,5 +1,5 @@
-name: counter_app
-description: "A new Flutter project."
+name: weather_app
+description: "A Flutter weather app for 10 world cities, powered by Open-Meteo."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -64,8 +64,8 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  assets:
-    - images/flutter_logo_192.png
+  # assets:
+  #   - images/flutter_logo_192.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
