@@ -5,13 +5,10 @@ A simple Flutter weather app that tracks 10 world cities. Swipe between cities, 
 ## Demo
 
 <p align="center">
-  <img src="images/home-day.png" alt="Home — clear day" width="260" />
-  <img src="images/home-night.png" alt="Home — clear night" width="260" />
-  <img src="images/home-rain.png" alt="Home — rainy weather" width="260" />
+  <img src="images/country.png" alt="By country" width="260" />
 </p>
 
 <p align="center">
-  <img src="images/forecast.png" alt="7-day forecast" width="260" />
   <img src="images/settings.png" alt="Settings — pick cities" width="260" />
 </p>
 
