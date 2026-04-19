@@ -14,14 +14,19 @@ import '../widgets/weather_icon.dart';
 /// The page receives the chosen [unit] from the parent so that switching
 /// between Celsius and Fahrenheit in Settings re-renders every page instantly
 /// without re-fetching data.
+///
+/// [onToggleUnit] is invoked when the user double-taps the current-temperature
+/// display — a quick way to flip between °C and °F without opening Settings.
 class WeatherPage extends StatefulWidget {
   final City city;
   final TemperatureUnit unit;
+  final VoidCallback? onToggleUnit;
 
   const WeatherPage({
     super.key,
     required this.city,
     required this.unit,
+    this.onToggleUnit,
   });
 
   @override
@@ -106,6 +111,7 @@ class _WeatherPageState extends State<WeatherPage>
             localNow: _cityLocalNow(),
             bg: bg,
             unit: widget.unit,
+            onToggleUnit: widget.onToggleUnit,
           );
         }
 
@@ -130,6 +136,7 @@ class _WeatherBody extends StatelessWidget {
   final DateTime localNow;
   final WeatherBackground bg;
   final TemperatureUnit unit;
+  final VoidCallback? onToggleUnit;
 
   const _WeatherBody({
     required this.city,
@@ -137,6 +144,7 @@ class _WeatherBody extends StatelessWidget {
     required this.localNow,
     required this.bg,
     required this.unit,
+    this.onToggleUnit,
   });
 
   @override
@@ -171,24 +179,51 @@ class _WeatherBody extends StatelessWidget {
 
         const SizedBox(height: 32),
 
-        Icon(
-          iconForWeatherCode(data.currentWeatherCode),
-          size: 96,
-          color: bg.onColor,
-        ),
-        const SizedBox(height: 8),
-        Text(
-          unit.format(data.currentTemperature),
-          style: theme.textTheme.displayMedium?.copyWith(
-            fontWeight: FontWeight.w500,
-            color: bg.onColor,
+        // Double-tap on the temperature (or the icon above it) to toggle
+        // between °C and °F. We use `behavior: opaque` + `Semantics` so the
+        // gesture is reliable and still readable by accessibility tools.
+        GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onDoubleTap: onToggleUnit,
+          child: Semantics(
+            button: onToggleUnit != null,
+            label: 'Current temperature, double tap to switch unit',
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  iconForWeatherCode(data.currentWeatherCode),
+                  size: 96,
+                  color: bg.onColor,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  unit.format(data.currentTemperature),
+                  style: theme.textTheme.displayMedium?.copyWith(
+                    fontWeight: FontWeight.w500,
+                    color: bg.onColor,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  weatherLabelFromCode(data.currentWeatherCode),
+                  style: theme.textTheme.titleMedium
+                      ?.copyWith(color: bg.onColor),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Double-tap to switch to '
+                  '${unit == TemperatureUnit.celsius ? '°F' : '°C'}',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: bg.secondaryOnColor,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
-          textAlign: TextAlign.center,
-        ),
-        Text(
-          weatherLabelFromCode(data.currentWeatherCode),
-          style: theme.textTheme.titleMedium?.copyWith(color: bg.onColor),
-          textAlign: TextAlign.center,
         ),
 
         const SizedBox(height: 32),

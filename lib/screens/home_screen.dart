@@ -43,6 +43,16 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  /// Flip between Celsius and Fahrenheit. Invoked from the per-page
+  /// double-tap gesture on the current temperature.
+  Future<void> _toggleUnit() async {
+    final next = _unit == TemperatureUnit.celsius
+        ? TemperatureUnit.fahrenheit
+        : TemperatureUnit.celsius;
+    setState(() => _unit = next);
+    await _prefs.saveTemperatureUnit(next);
+  }
+
   Future<void> _openSettings() async {
     await Navigator.of(context).push(
       MaterialPageRoute(
@@ -111,11 +121,12 @@ class _HomeScreenState extends State<HomeScreen> {
       onPageChanged: (index) => setState(() => _currentPage = index),
       itemBuilder: (context, index) {
         return WeatherPage(
-          // Include the unit in the key so switching units rebuilds each
-          // page with the new formatting.
-          key: ValueKey('${_cities[index].id}-${_unit.storageKey}'),
+          // Key is stable per-city so we don't refetch on unit toggle; the
+          // page re-renders because its `unit` prop changed.
+          key: ValueKey(_cities[index].id),
           city: _cities[index],
           unit: _unit,
+          onToggleUnit: _toggleUnit,
         );
       },
     );
