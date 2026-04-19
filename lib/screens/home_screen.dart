@@ -30,7 +30,9 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadPreferences() async {
-    final cities = await _prefs.loadSelectedCities();
+    // Use loadDisplayCities() so user-added custom cities appear in the
+    // swipeable PageView alongside the catalog selections.
+    final cities = await _prefs.loadDisplayCities();
     final unit = await _prefs.loadTemperatureUnit();
     setState(() {
       _cities = cities;

@@ -3,6 +3,12 @@
 /// [id] is a stable identifier used to persist the user's selection.
 /// [timezone] is an IANA timezone name (e.g. "Asia/Ho_Chi_Minh") understood
 /// by Open-Meteo so that returned timestamps match local time.
+///
+/// Cities come from two sources:
+///   * [kCityCatalog] — the built-in fixed catalog (ids are slugs like
+///     "hanoi"). These are always available and toggled on/off via Settings.
+///   * User-added custom cities — created with [City.custom] from geocoding
+///     results, persisted as JSON via [toJson] / [fromJson].
 class City {
   final String id;
   final String name;
@@ -19,6 +25,48 @@ class City {
     required this.longitude,
     required this.timezone,
   });
+
+  /// Builds a custom (user-added) city. The id encodes lat/lon so two
+  /// distinct points never collide even if they happen to share a name.
+  factory City.custom({
+    required String name,
+    required String country,
+    required double latitude,
+    required double longitude,
+    required String timezone,
+  }) {
+    final lat = latitude.toStringAsFixed(4);
+    final lon = longitude.toStringAsFixed(4);
+    return City(
+      id: 'custom_${lat}_$lon',
+      name: name,
+      country: country,
+      latitude: latitude,
+      longitude: longitude,
+      timezone: timezone,
+    );
+  }
+
+  /// True when this city was added by the user (not from [kCityCatalog]).
+  bool get isCustom => id.startsWith('custom_');
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'country': country,
+        'latitude': latitude,
+        'longitude': longitude,
+        'timezone': timezone,
+      };
+
+  factory City.fromJson(Map<String, dynamic> json) => City(
+        id: json['id'] as String,
+        name: json['name'] as String,
+        country: json['country'] as String? ?? '',
+        latitude: (json['latitude'] as num).toDouble(),
+        longitude: (json['longitude'] as num).toDouble(),
+        timezone: json['timezone'] as String,
+      );
 }
 
 /// The fixed catalog of 10 cities the app supports.
