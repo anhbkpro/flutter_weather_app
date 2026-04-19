@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/city.dart';
+import '../models/temperature_unit.dart';
 import '../services/preferences_service.dart';
 import 'settings_screen.dart';
 import 'weather_page.dart';
@@ -17,6 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final PreferencesService _prefs = PreferencesService();
   late PageController _controller;
   List<City> _cities = [];
+  TemperatureUnit _unit = TemperatureUnit.celsius;
   int _currentPage = 0;
   bool _loading = true;
 
@@ -24,13 +26,15 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _controller = PageController();
-    _loadCities();
+    _loadPreferences();
   }
 
-  Future<void> _loadCities() async {
+  Future<void> _loadPreferences() async {
     final cities = await _prefs.loadSelectedCities();
+    final unit = await _prefs.loadTemperatureUnit();
     setState(() {
       _cities = cities;
+      _unit = unit;
       _loading = false;
       // Clamp in case the previously selected page no longer exists.
       if (_currentPage >= _cities.length) {
@@ -45,8 +49,8 @@ class _HomeScreenState extends State<HomeScreen> {
         builder: (_) => const SettingsScreen(),
       ),
     );
-    // Selections may have changed — reload.
-    await _loadCities();
+    // City selection and/or unit may have changed — reload both.
+    await _loadPreferences();
     if (_controller.hasClients && _cities.isNotEmpty) {
       _controller.jumpToPage(_currentPage);
     }
@@ -107,8 +111,11 @@ class _HomeScreenState extends State<HomeScreen> {
       onPageChanged: (index) => setState(() => _currentPage = index),
       itemBuilder: (context, index) {
         return WeatherPage(
-          key: ValueKey(_cities[index].id),
+          // Include the unit in the key so switching units rebuilds each
+          // page with the new formatting.
+          key: ValueKey('${_cities[index].id}-${_unit.storageKey}'),
           city: _cities[index],
+          unit: _unit,
         );
       },
     );

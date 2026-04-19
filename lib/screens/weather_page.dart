@@ -3,16 +3,26 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../models/city.dart';
+import '../models/temperature_unit.dart';
 import '../models/weather.dart';
 import '../services/weather_service.dart';
 import '../widgets/weather_background.dart';
 import '../widgets/weather_icon.dart';
 
 /// Shows current weather + 7-day forecast for a single [city].
+///
+/// The page receives the chosen [unit] from the parent so that switching
+/// between Celsius and Fahrenheit in Settings re-renders every page instantly
+/// without re-fetching data.
 class WeatherPage extends StatefulWidget {
   final City city;
+  final TemperatureUnit unit;
 
-  const WeatherPage({super.key, required this.city});
+  const WeatherPage({
+    super.key,
+    required this.city,
+    required this.unit,
+  });
 
   @override
   State<WeatherPage> createState() => _WeatherPageState();
@@ -95,6 +105,7 @@ class _WeatherPageState extends State<WeatherPage>
             data: snapshot.data!,
             localNow: _cityLocalNow(),
             bg: bg,
+            unit: widget.unit,
           );
         }
 
@@ -118,12 +129,14 @@ class _WeatherBody extends StatelessWidget {
   final WeatherData data;
   final DateTime localNow;
   final WeatherBackground bg;
+  final TemperatureUnit unit;
 
   const _WeatherBody({
     required this.city,
     required this.data,
     required this.localNow,
     required this.bg,
+    required this.unit,
   });
 
   @override
@@ -165,7 +178,7 @@ class _WeatherBody extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '${data.currentTemperature.round()}°C',
+          unit.format(data.currentTemperature),
           style: theme.textTheme.displayMedium?.copyWith(
             fontWeight: FontWeight.w500,
             color: bg.onColor,
@@ -190,7 +203,7 @@ class _WeatherBody extends StatelessWidget {
         ),
         const SizedBox(height: 8),
 
-        for (final day in data.daily) _DailyRow(day: day, bg: bg),
+        for (final day in data.daily) _DailyRow(day: day, bg: bg, unit: unit),
       ],
     );
   }
@@ -212,8 +225,13 @@ class _WeatherBody extends StatelessWidget {
 class _DailyRow extends StatelessWidget {
   final DailyForecast day;
   final WeatherBackground bg;
+  final TemperatureUnit unit;
 
-  const _DailyRow({required this.day, required this.bg});
+  const _DailyRow({
+    required this.day,
+    required this.bg,
+    required this.unit,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -241,7 +259,8 @@ class _DailyRow extends StatelessWidget {
             ),
           ),
           Text(
-            '${day.minTemperature.round()}° / ${day.maxTemperature.round()}°',
+            '${unit.format(day.minTemperature, includeSymbol: false)} / '
+            '${unit.format(day.maxTemperature, includeSymbol: false)}',
             style: theme.textTheme.bodyLarge?.copyWith(
               fontWeight: FontWeight.w600,
               color: bg.onColor,
